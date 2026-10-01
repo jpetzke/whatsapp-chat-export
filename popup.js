@@ -3,8 +3,8 @@ const status = (t) => (document.getElementById('status').textContent = t);
 document.getElementById('go').onclick = async () => {
   const n = parseInt(document.getElementById('n').value, 10) || 100;
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  if (!tab?.url?.startsWith('https://web.whatsapp.com')) return status('Nicht auf web.whatsapp.com');
-  status('Lade Nachrichten…');
+  if (!tab?.url?.startsWith('https://web.whatsapp.com')) return status('Not on web.whatsapp.com');
+  status('Loading messages…');
   try {
     const [{ result }] = await chrome.scripting.executeScript({
       target: { tabId: tab.id },
@@ -16,16 +16,16 @@ document.getElementById('go').onclick = async () => {
     a.href = URL.createObjectURL(new Blob([result.md], { type: 'text/plain' }));
     a.download = `whatsapp_${result.chat.replace(/[^\w-]+/g, '_')}_${result.stamp.replace(/[: ]/g, '-')}.txt`;
     a.click();
-    status(`${result.count} Nachrichten exportiert`);
+    status(`Exported ${result.count} messages`);
   } catch (e) {
-    status('Fehler: ' + e.message);
+    status('Error: ' + e.message);
   }
 };
 
 // Runs inside the WhatsApp Web page.
 async function exportChat(n) {
   const main = document.querySelector('#main');
-  if (!main) return { error: 'Kein Chat geöffnet' };
+  if (!main) return { error: 'No chat open' };
   const chat = main.querySelector('header span[dir="auto"]')?.textContent.trim() || 'Chat';
   const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
@@ -64,30 +64,30 @@ async function exportChat(n) {
 
     const has = (sel) => [...m.querySelectorAll(sel)].some(outsideQ);
     const media = [];
-    if (has('[data-icon="recalled"]')) media.push('[Gelöschte Nachricht]');
-    if (has('[data-icon*="forward"]')) media.push('[Weitergeleitet]');
+    if (has('[data-icon="recalled"]')) media.push('[Deleted message]');
+    if (has('[data-icon*="forward"]')) media.push('[Forwarded]');
     if (has('[data-icon*="audio"], [data-icon*="ptt"], audio')) {
       const dur = [...m.querySelectorAll('span, div')].filter(outsideQ).map((e) => e.textContent.trim())
         .find((t) => /^\d{1,2}:\d{2}$/.test(t) && t !== time);
-      media.push(`[Sprachnachricht${dur ? ' ' + dur : ''}]`);
+      media.push(`[Voice message${dur ? ' ' + dur : ''}]`);
     }
     if (has('video, [data-icon*="video"], [data-icon="media-play"]')) media.push('[Video]');
     if (has('[data-icon*="document"], [data-icon*="doc-"]')) {
       const name = [...m.querySelectorAll('[title]')].filter(outsideQ).map((e) => e.title).find(Boolean);
-      media.push(`[Dokument${name ? ': ' + name : ''}]`);
+      media.push(`[Document${name ? ': ' + name : ''}]`);
     }
     if (has('[data-icon*="sticker"]') || /sticker/i.test(m.innerHTML)) media.push('[Sticker]');
-    else if (has('img[src^="blob:"], img[src*="mmg.whatsapp.net"]')) media.push('[Bild]');
-    if (has('[data-icon*="location"]') || m.querySelector('a[href*="maps.google"]')) media.push('[Standort]');
-    if (has('[data-icon*="vcard"], [data-icon*="contact"]')) media.push('[Kontakt]');
-    if ([...m.querySelectorAll('span')].some((e) => /^(Bearbeitet|Edited)$/i.test(e.textContent.trim()))) media.push('[Bearbeitet]');
+    else if (has('img[src^="blob:"], img[src*="mmg.whatsapp.net"]')) media.push('[Image]');
+    if (has('[data-icon*="location"]') || m.querySelector('a[href*="maps.google"]')) media.push('[Location]');
+    if (has('[data-icon*="vcard"], [data-icon*="contact"]')) media.push('[Contact]');
+    if ([...m.querySelectorAll('span')].some((e) => /^(Bearbeitet|Edited)$/i.test(e.textContent.trim()))) media.push('[Edited]');
     const links = [...m.querySelectorAll('a[href]')].filter(outsideQ).map((e) => e.href)
       .filter((h) => !body.includes(h) && !h.startsWith('javascript'));
 
     const rEl = row.querySelector('[aria-label*="reakt" i], [aria-label*="react" i]');
     const reactions = rEl ? (textOf(rEl).trim() || rEl.getAttribute('aria-label')) : '';
 
-    return { date: pm?.[2] || '', time, sender: pm?.[3] || (fromMe ? 'Ich' : chat), fromMe, quote, body, media, links, reactions };
+    return { date: pm?.[2] || '', time, sender: pm?.[3] || (fromMe ? 'Me' : chat), fromMe, quote, body, media, links, reactions };
   };
 
   // List is virtualized: scroll up step by step, collect rendered messages by data-id
@@ -109,11 +109,11 @@ async function exportChat(n) {
   };
 
   const anyMsg = main.querySelector('[data-id]');
-  if (!anyMsg) return { error: 'Keine Nachrichten gefunden' };
+  if (!anyMsg) return { error: 'No messages found' };
   let scroller = anyMsg.parentElement;
   while (scroller && !(scroller.scrollHeight > scroller.clientHeight + 5 && /auto|scroll/.test(getComputedStyle(scroller).overflowY)))
     scroller = scroller.parentElement;
-  if (!scroller) return { error: 'Scroll-Container nicht gefunden' };
+  if (!scroller) return { error: 'Scroll container not found' };
 
   scroller.scrollTop = scroller.scrollHeight;
   await sleep(800);
@@ -133,26 +133,26 @@ async function exportChat(n) {
 
   // Compact LLM-friendly output: one heading per day, "[HH:MM] Sender: text"
   const iso = (d) => { const m = d.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); return m ? `${m[3]}-${m[2].padStart(2, '0')}-${m[1].padStart(2, '0')}` : d; };
-  const me = [...data.values()].find((d) => d.fromMe && d.sender !== 'Ich')?.sender || 'Ich';
+  const me = [...data.values()].find((d) => d.fromMe && d.sender !== 'Me')?.sender || 'Me';
   const ids = order.slice(-n);
   let lastDate = '', curDate = null;
   const out = [];
   for (const id of ids) {
     const d = data.get(id);
-    if (!d) { out.push('[Nachricht nicht geladen]'); continue; }
+    if (!d) { out.push('[Message not loaded]'); continue; }
     if (d.date) lastDate = iso(d.date);
     if (lastDate !== curDate) { out.push(`\n## ${lastDate}`); curDate = lastDate; }
     const text = [d.media.join(' '), d.body, ...d.links].filter(Boolean).join(d.body.includes('\n') ? '\n' : ' ');
     const quote = d.quote ? d.quote.replace(/^(Du|You):/, `${me}:`) : '';
     let msg = `[${d.time}] ${d.sender}:`;
     msg += quote ? `\n> ${quote}\n${text}` : text.includes('\n') ? `\n${text}` : ` ${text}`;
-    if (d.reactions) msg += `\nReaktionen: ${d.reactions}`;
+    if (d.reactions) msg += `\nReactions: ${d.reactions}`;
     out.push(msg.replace(/[ \t]+$/gm, ''));
   }
 
   const now = new Date();
   const stamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${now.toTimeString().slice(0, 8)}`;
-  const md = `# WhatsApp-Chat: ${chat}\nExportiert ${stamp} · ${ids.length} Nachrichten · Format: [HH:MM] Absender: Text, "> " = zitierte Nachricht, auf die geantwortet wird\n` + out.join('\n') + '\n';
+  const md = `# WhatsApp chat: ${chat}\nExported ${stamp} · ${ids.length} messages · Format: [HH:MM] Sender: text, "> " = quoted message being replied to\n` + out.join('\n') + '\n';
   return { md, chat, stamp, count: ids.length };
 }
 
@@ -163,7 +163,7 @@ document.getElementById('dbg').onclick = async () => {
   a.href = URL.createObjectURL(new Blob([result], { type: 'text/plain' }));
   a.download = 'wa_debug.txt';
   a.click();
-  status('Debug-Dump gespeichert');
+  status('Debug dump saved');
 };
 
 // Dumps structure of the last messages; letters masked (x), digits/punctuation/emoji kept.

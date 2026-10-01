@@ -10,7 +10,7 @@ Includes per message: date, time (HH:MM), sender, quoted message being replied t
 [12:49] Bob:
 > Alice: Back from the festival
 Glad you survived
-Reaktionen: 👍
+Reactions: 👍
 ```
 
 ## Install
@@ -18,9 +18,9 @@ Reaktionen: 👍
 2. "Load unpacked" → select this folder
 
 ## Use
-Open a chat on web.whatsapp.com → click the extension → set N → "Exportieren". The chat is scrolled up automatically (WhatsApp virtualizes the message list) and a `.txt` file is downloaded.
+Open a chat on web.whatsapp.com → click the extension → set N → "Export". The chat is scrolled up automatically (WhatsApp virtualizes the message list) and a `.txt` file is downloaded.
 
-"Debug-Dump" saves the chat's DOM structure with all letters masked, for fixing selectors when WhatsApp changes its markup.
+"Debug dump" saves the chat's DOM structure with all letters masked, for fixing selectors when WhatsApp changes its markup.
 
 ## Limitations
 - Scrapes the DOM, so it breaks when WhatsApp Web changes its markup.

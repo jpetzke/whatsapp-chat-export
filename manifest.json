@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WhatsApp Chat Export",
   "version": "1.0",
-  "description": "Exportiert die letzten N Nachrichten eines WhatsApp-Web-Chats als Markdown.",
+  "description": "Export the last N messages of a WhatsApp Web chat as compact, LLM-friendly Markdown.",
   "permissions": ["activeTab", "scripting"],
   "host_permissions": ["https://web.whatsapp.com/*"],
   "action": { "default_popup": "popup.html" }
