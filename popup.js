@@ -1,3 +1,6 @@
+// Set to true to show the "Debug dump" button (masked DOM dump for fixing selectors).
+const DEBUG = false;
+
 const status = (t) => (document.getElementById('status').textContent = t);
 
 document.getElementById('go').onclick = async () => {
@@ -156,6 +159,7 @@ async function exportChat(n) {
   return { md, chat, stamp, count: ids.length };
 }
 
+document.getElementById('dbg').hidden = !DEBUG;
 document.getElementById('dbg').onclick = async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   const [{ result }] = await chrome.scripting.executeScript({ target: { tabId: tab.id }, func: debugDump });

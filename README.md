@@ -20,7 +20,7 @@ Reactions: 👍
 ## Use
 Open a chat on web.whatsapp.com → click the extension → set N → "Export". The chat is scrolled up automatically (WhatsApp virtualizes the message list) and a `.txt` file is downloaded.
 
-"Debug dump" saves the chat's DOM structure with all letters masked, for fixing selectors when WhatsApp changes its markup.
+For fixing selectors when WhatsApp changes its markup: set `DEBUG = true` in `popup.js` to show a "Debug dump" button that saves the chat's DOM structure with all letters masked.
 
 ## Limitations
 - Scrapes the DOM, so it breaks when WhatsApp Web changes its markup.
